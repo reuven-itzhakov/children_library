@@ -10,8 +10,14 @@ import 'package:file_picker/file_picker.dart';
 @immutable
 class ExampleCupertinoDownloadButton extends StatefulWidget {
   final List<Map<String, dynamic>> files;
-
-  const ExampleCupertinoDownloadButton({super.key, required this.files});
+  final age_group;
+  final image_path;
+  const ExampleCupertinoDownloadButton({
+    super.key,
+    required this.files,
+    required this.age_group,
+    required this.image_path,
+  });
 
   @override
   State<ExampleCupertinoDownloadButton> createState() =>
@@ -40,7 +46,15 @@ class _ExampleCupertinoDownloadButtonState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Apps')),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Text("Ages" + widget.age_group),
+            Image.asset("${widget.image_path}", width: 100, height: 100),
+          ],
+        ),
+        titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+      ),
       body: ListView.separated(
         itemCount: _downloadControllers.length,
         separatorBuilder: (_, _) => const Divider(),
@@ -123,13 +137,13 @@ class _ExampleCupertinoDownloadButtonState
           file: file,
           fileName: fileName,
           fileType: fileType,
-          ageGroup: '0-4',
+          ageGroup: widget.age_group,
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('File uploaded Successfully!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('File uploaded Successfully!')),
+          );
         }
       } catch (e) {
         if (mounted) {

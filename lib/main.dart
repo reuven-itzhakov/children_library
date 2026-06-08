@@ -49,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisSpacing: 20.0,
           padding: EdgeInsets.all(30.0),
           children: [
-            Image.asset("../assets/wordfile.png"),
-            Image.asset("../assets/pdffile.png"),
+            Image.asset("assets/wordfile.png"),
+            Image.asset("assets/pdffile.png"),
             ElevatedButton(
               onPressed: () async {
                 List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
@@ -59,7 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                    builder: (context) => ExampleCupertinoDownloadButton(
+                      files: myFiles,
+                      age_group: "0-4",
+                      image_path: "assets/wordfile.png",
+                    ),
                   ),
                 );
               },
@@ -68,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              child: Image.asset("../assets/ages0-4.png"),
+              child: Image.asset("assets/ages0-4.png"),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -78,7 +82,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                    builder: (context) => ExampleCupertinoDownloadButton(
+                      files: myFiles,
+                      age_group: "0-4",
+                      image_path: "assets/pdffile.png",
+                    ),
                   ),
                 );
               },
@@ -87,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              child: Image.asset("../assets/ages0-4.png"),
+              child: Image.asset("assets/ages0-4.png"),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -97,7 +105,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                    builder: (context) => ExampleCupertinoDownloadButton(
+                      files: myFiles,
+                      age_group: "4-8",
+                      image_path: "assets/wordfile.png",
+                    ),
                   ),
                 );
               },
@@ -106,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              child: Image.asset("../assets/ages4-8.png"),
+              child: Image.asset("assets/ages4-8.png"),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -116,7 +128,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                    builder: (context) => ExampleCupertinoDownloadButton(
+                      files: myFiles,
+                      age_group: "4-8",
+                      image_path: "assets/pdffile.png",
+                    ),
                   ),
                 );
               },
@@ -125,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              child: Image.asset("../assets/ages4-8.png"),
+              child: Image.asset("assets/ages4-8.png"),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -135,7 +151,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                    builder: (context) => ExampleCupertinoDownloadButton(
+                      files: myFiles,
+                      age_group: "8-12",
+                      image_path: "assets/wordfile.png",
+                    ),
                   ),
                 );
               },
@@ -144,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              child: Image.asset("../assets/ages8-12.png"),
+              child: Image.asset("assets/ages8-12.png"),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -154,7 +174,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                    builder: (context) => ExampleCupertinoDownloadButton(
+                      files: myFiles,
+                      age_group: "8-12",
+                      image_path: "assets/pdffile.png",
+                    ),
                   ),
                 );
               },
@@ -163,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              child: Image.asset("../assets/ages8-12.png"),
+              child: Image.asset("assets/ages8-12.png"),
             ),
           ],
         ),

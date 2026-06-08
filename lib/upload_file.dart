@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart'; // הוספנו את הייבוא הזה
 
 Future<void> uploadFileAndSaveMetadata({
   required File file,
@@ -10,7 +11,14 @@ Future<void> uploadFileAndSaveMetadata({
 }) async {
   try {
     String storagePath = 'files/$fileType/$ageGroup/$fileName';
-    Reference storageRef = FirebaseStorage.instance.ref().child(storagePath);
+
+    // שולפים את כתובת ה-Bucket מההגדרות ומשתמשים בה במפורש
+    String? bucketUrl = DefaultFirebaseOptions.currentPlatform.storageBucket;
+    FirebaseStorage storage = bucketUrl != null
+        ? FirebaseStorage.instanceFor(bucket: bucketUrl)
+        : FirebaseStorage.instance;
+
+    Reference storageRef = storage.ref().child(storagePath);
 
     UploadTask uploadTask = storageRef.putFile(file);
     TaskSnapshot snapshot = await uploadTask;
@@ -25,7 +33,7 @@ Future<void> uploadFileAndSaveMetadata({
       'uploaded_at': FieldValue.serverTimestamp(),
     });
 
-    print('File was uploaded successfully.!');
+    print('File was uploaded successfully!');
   } catch (e) {
     print('Error uploading file: $e');
   }
