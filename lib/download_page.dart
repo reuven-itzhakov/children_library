@@ -1,9 +1,17 @@
+import 'package:children_library/upload_file.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:file_picker/file_picker.dart';
 
 @immutable
 class ExampleCupertinoDownloadButton extends StatefulWidget {
-  const ExampleCupertinoDownloadButton({super.key});
+  final List<Map<String, dynamic>> files;
+
+  const ExampleCupertinoDownloadButton({super.key, required this.files});
 
   @override
   State<ExampleCupertinoDownloadButton> createState() =>
@@ -18,19 +26,15 @@ class _ExampleCupertinoDownloadButtonState
   void initState() {
     super.initState();
     _downloadControllers = List<DownloadController>.generate(
-      20,
-      (index) => SimulatedDownloadController(
-        onOpenDownload: () {
-          _openDownload(index);
-        },
-      ),
-    );
-  }
+      widget.files.length,
+      (index) {
+        final fileData = widget.files[index];
+        final downloadUrl = fileData['download_url'] ?? '';
+        final fileName = fileData['file_name'] ?? 'file_$index.pdf';
 
-  void _openDownload(int index) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Open App ${index + 1}')));
+        return RealDownloadController(url: downloadUrl, fileName: fileName);
+      },
+    );
   }
 
   @override
@@ -42,6 +46,11 @@ class _ExampleCupertinoDownloadButtonState
         separatorBuilder: (_, _) => const Divider(),
         itemBuilder: _buildListItem,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pickAndUploadFile,
+        tooltip: 'Upload a new file',
+        child: const Icon(Icons.upload_file),
+      ),
     );
   }
 
@@ -49,15 +58,19 @@ class _ExampleCupertinoDownloadButtonState
     final theme = Theme.of(context);
     final downloadController = _downloadControllers[index];
 
+    final fileData = widget.files[index];
+    final fileName = fileData['file_name'] ?? 'File without a name';
+    final fileType = fileData['file_type'] ?? 'Unknown';
+
     return ListTile(
       leading: const DemoAppIcon(),
       title: Text(
-        'App ${index + 1}',
+        fileName,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.titleLarge,
       ),
       subtitle: Text(
-        'Lorem ipsum dolor #${index + 1}',
+        'Type of file: $fileType',
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodySmall,
       ),
@@ -77,6 +90,57 @@ class _ExampleCupertinoDownloadButtonState
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _downloadControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _pickAndUploadFile() async {
+    FilePickerResult? result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      File file = File(result.files.single.path!);
+      String fileName = result.files.single.name;
+
+      String fileType = fileName.toLowerCase().endsWith('.pdf')
+          ? 'pdf'
+          : 'word';
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Starting upload $fileName...')));
+
+      try {
+        await uploadFileAndSaveMetadata(
+          file: file,
+          fileName: fileName,
+          fileType: fileType,
+          ageGroup: '0-4',
+        );
+
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('File uploaded Successfully!')));
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Upload error: $e')));
+        }
+      }
+    } else {
+      print('File selection canceled');
+    }
   }
 }
 
@@ -118,39 +182,71 @@ abstract class DownloadController implements ChangeNotifier {
   void openDownload();
 }
 
-class SimulatedDownloadController extends DownloadController
-    with ChangeNotifier {
-  SimulatedDownloadController({
-    DownloadStatus downloadStatus = DownloadStatus.notDownloaded,
-    double progress = 0.0,
-    required VoidCallback onOpenDownload,
-  })  : _downloadStatus = downloadStatus,
-        _progress = progress,
-        _onOpenDownload = onOpenDownload;
+class RealDownloadController extends DownloadController with ChangeNotifier {
+  RealDownloadController({required this.url, required this.fileName});
 
-  DownloadStatus _downloadStatus;
+  final String url;
+  final String fileName;
+
+  final Dio _dio = Dio();
+  CancelToken? _cancelToken;
+  String? _savePath;
+
+  DownloadStatus _downloadStatus = DownloadStatus.notDownloaded;
   @override
   DownloadStatus get downloadStatus => _downloadStatus;
 
-  double _progress;
+  double _progress = 0.0;
   @override
   double get progress => _progress;
 
-  final VoidCallback _onOpenDownload;
-
-  bool _isDownloading = false;
-
   @override
-  void startDownload() {
+  Future<void> startDownload() async {
     if (downloadStatus == DownloadStatus.notDownloaded) {
-      _doSimulatedDownload();
+      _downloadStatus = DownloadStatus.fetchingDownload;
+      notifyListeners();
+
+      try {
+        Directory dir = await getApplicationDocumentsDirectory();
+        _savePath = '${dir.path}/$fileName';
+        _cancelToken = CancelToken();
+
+        _downloadStatus = DownloadStatus.downloading;
+        notifyListeners();
+
+        await _dio.download(
+          url,
+          _savePath,
+          cancelToken: _cancelToken,
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              _progress = received / total;
+              notifyListeners();
+            }
+          },
+        );
+
+        _downloadStatus = DownloadStatus.downloaded;
+        notifyListeners();
+      } catch (e) {
+        if (CancelToken.isCancel(
+          DioException.badCertificate(requestOptions: RequestOptions()),
+        )) {
+          print('The download was cancel by the user');
+        } else {
+          print('Download error: $e');
+          _downloadStatus = DownloadStatus.notDownloaded;
+          _progress = 0.0;
+          notifyListeners();
+        }
+      }
     }
   }
 
   @override
   void stopDownload() {
-    if (_isDownloading) {
-      _isDownloading = false;
+    if (_downloadStatus == DownloadStatus.downloading) {
+      _cancelToken?.cancel();
       _downloadStatus = DownloadStatus.notDownloaded;
       _progress = 0.0;
       notifyListeners();
@@ -159,55 +255,9 @@ class SimulatedDownloadController extends DownloadController
 
   @override
   void openDownload() {
-    if (downloadStatus == DownloadStatus.downloaded) {
-      _onOpenDownload();
+    if (downloadStatus == DownloadStatus.downloaded && _savePath != null) {
+      OpenFilex.open(_savePath!);
     }
-  }
-
-  Future<void> _doSimulatedDownload() async {
-    _isDownloading = true;
-    _downloadStatus = DownloadStatus.fetchingDownload;
-    notifyListeners();
-
-    // Wait a second to simulate fetch time.
-    await Future<void>.delayed(const Duration(seconds: 1));
-
-    // If the user chose to cancel the download, stop the simulation.
-    if (!_isDownloading) {
-      return;
-    }
-
-    // Shift to the downloading phase.
-    _downloadStatus = DownloadStatus.downloading;
-    notifyListeners();
-
-    const downloadProgressStops = [0.0, 0.15, 0.45, 0.8, 1.0];
-    for (final stop in downloadProgressStops) {
-      // Wait a second to simulate varying download speeds.
-      await Future<void>.delayed(const Duration(seconds: 1));
-
-      // If the user chose to cancel the download, stop the simulation.
-      if (!_isDownloading) {
-        return;
-      }
-
-      // Update the download progress.
-      _progress = stop;
-      notifyListeners();
-    }
-
-    // Wait a second to simulate a final delay.
-    await Future<void>.delayed(const Duration(seconds: 1));
-
-    // If the user chose to cancel the download, stop the simulation.
-    if (!_isDownloading) {
-      return;
-    }
-
-    // Shift to the downloaded state, completing the simulation.
-    _downloadStatus = DownloadStatus.downloaded;
-    _isDownloading = false;
-    notifyListeners();
   }
 }
 
@@ -242,7 +292,6 @@ class DownloadButton extends StatelessWidget {
         onDownload();
         break;
       case DownloadStatus.fetchingDownload:
-        // do nothing.
         break;
       case DownloadStatus.downloading:
         onCancel();

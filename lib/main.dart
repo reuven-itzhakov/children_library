@@ -1,4 +1,5 @@
-import 'package:children_library/DownloadPage.dart';
+import 'package:children_library/download_page.dart';
+import 'package:children_library/get_files.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -6,11 +7,9 @@ import 'firebase_options.dart';
 void main() async {
   // Ensure Flutter bindings are initialized before calling native code
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase with the generated configuration
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }
@@ -53,11 +52,17 @@ class _MyHomePageState extends State<MyHomePage> {
             Image.asset("../assets/wordfile.png"),
             Image.asset("../assets/pdffile.png"),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExampleCupertinoDownloadButton(),
-                ),
-              ),
+              onPressed: () async {
+                List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
+                  'word',
+                  '0-4',
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -66,11 +71,17 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Image.asset("../assets/ages0-4.png"),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExampleCupertinoDownloadButton(),
-                ),
-              ),
+              onPressed: () async {
+                List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
+                  'pdf',
+                  '0-4',
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -79,11 +90,17 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Image.asset("../assets/ages0-4.png"),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExampleCupertinoDownloadButton(),
-                ),
-              ),
+              onPressed: () async {
+                List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
+                  'word',
+                  '4-8',
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -92,11 +109,17 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Image.asset("../assets/ages4-8.png"),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExampleCupertinoDownloadButton(),
-                ),
-              ),
+              onPressed: () async {
+                List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
+                  'pdf',
+                  '4-8',
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -105,11 +128,17 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Image.asset("../assets/ages4-8.png"),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExampleCupertinoDownloadButton(),
-                ),
-              ),
+              onPressed: () async {
+                List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
+                  'word',
+                  '8-12',
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -118,11 +147,17 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Image.asset("../assets/ages8-12.png"),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExampleCupertinoDownloadButton(),
-                ),
-              ),
+              onPressed: () async {
+                List<Map<String, dynamic>> myFiles = await fetchSpecificFiles(
+                  'pdf',
+                  '8-12',
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ExampleCupertinoDownloadButton(files: myFiles),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
